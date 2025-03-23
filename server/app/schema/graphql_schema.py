@@ -19,12 +19,16 @@ class LoanPayment(graphene.ObjectType):
 class Query(graphene.ObjectType):
     loans = graphene.List(ExistingLoans)
     loan_payments = graphene.List(LoanPayment)
+    loans_with_payments = graphene.List(ExistingLoans)
 
     def resolve_loans(self, info):
         return get_all_loans()
 
     def resolve_loan_payments(self, info):
         return get_all_payments()
+
+    def resolve_loans_with_payments(self, info):
+        return get_all_loans()
 
 
 schema = graphene.Schema(query=Query)
