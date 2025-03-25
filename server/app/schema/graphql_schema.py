@@ -26,6 +26,7 @@ class LoanWithPayment(graphene.ObjectType):
     payment_date = graphene.String(name="paymentDate")
     payment_id = graphene.Int(name="paymentId")
     status = graphene.String()
+    color = graphene.String()
 
 
 class Query(graphene.ObjectType):
@@ -50,6 +51,17 @@ class Query(graphene.ObjectType):
             loan_id = loan["id"]
             payment = payment_dict.get(loan_id)
 
+            status = get_payment_status(
+                loan["due_date"], payment["payment_date"] if payment else None
+            )
+
+            status_colors = {
+                "On Time": "green",
+                "Late": "orange", 
+                "Defaulted": "red",
+                "Unpaid": "grey"
+            }
+
             loan_with_payment = {
                 "id": loan_id,
                 "name": loan["name"],
@@ -60,9 +72,8 @@ class Query(graphene.ObjectType):
                     payment["payment_date"].isoformat() if payment else None
                 ),
                 "payment_id": payment["id"] if payment else None,
-                "status": get_payment_status(
-                    loan["due_date"], payment["payment_date"] if payment else None
-                ),
+                "status": status,
+                "color": status_colors.get(status, "grey")
             }
             result.append(loan_with_payment)
 
