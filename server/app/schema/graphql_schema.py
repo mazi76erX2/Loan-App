@@ -1,5 +1,6 @@
 import graphene
 import datetime
+import traceback
 from app.data.loans import loans
 from app.utils.helpers import get_payment_status
 
@@ -7,10 +8,10 @@ from app.utils.helpers import get_payment_status
 class LoanType(graphene.ObjectType):
     id = graphene.Int()
     name = graphene.String()
-    interest_rate = graphene.Float(name="interestRate")
+    interestRate = graphene.Float()
     principal = graphene.Int()
-    due_date = graphene.String(name="dueDate")
-    payment_date = graphene.String(name="paymentDate")
+    dueDate = graphene.String()
+    paymentDate = graphene.String()
     status = graphene.String()
     color = graphene.String()
 
@@ -18,16 +19,30 @@ class LoanType(graphene.ObjectType):
 class AddLoanMutation(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)
-        interest_rate = graphene.Float(required=True)
+        interestRate = graphene.Float(required=True)
         principal = graphene.Int(required=True)
-        due_date = graphene.String(required=True)
-        payment_date = graphene.String(required=False)
+        dueDate = graphene.String(required=True)
+        paymentDate = graphene.String(required=False)
 
     Output = LoanType
 
     @staticmethod
-    def mutate(root, info, name, interest_rate, principal, due_date, payment_date=None):
+    def mutate(root, info, **kwargs):
         try:
+            print("Received mutation arguments:", kwargs)  # Debug print
+
+            # Extract arguments with default values
+            name = kwargs.get("name")
+            interest_rate = kwargs.get("interestRate")
+            principal = kwargs.get("principal")
+            due_date = kwargs.get("dueDate")
+            payment_date = kwargs.get("paymentDate", None)
+
+            # Validate required fields
+            if not all([name, interest_rate is not None, principal, due_date]):
+                raise ValueError("Missing required fields")
+
+            # Convert dates
             due_date_obj = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
             payment_date_obj = (
                 datetime.datetime.strptime(payment_date, "%Y-%m-%d").date()
@@ -35,12 +50,14 @@ class AddLoanMutation(graphene.Mutation):
                 else None
             )
 
+            # Determine status
             status = (
                 get_payment_status(due_date_obj, payment_date_obj)
                 if payment_date_obj
                 else "Unpaid"
             )
 
+            # Define color mapping
             status_colors = {
                 "On Time": "green",
                 "Late": "orange",
@@ -48,24 +65,38 @@ class AddLoanMutation(graphene.Mutation):
                 "Unpaid": "grey",
             }
 
+            # Create new loan
             new_loan = {
                 "id": len(loans) + 1,
                 "name": name,
-                "interest_rate": interest_rate,
-                "principal": principal,
-                "due_date": due_date_obj.isoformat(),
-                "payment_date": (
-                    payment_date_obj.isoformat() if payment_date_obj else None
-                ),
+                "interest_rate": float(interest_rate),
+                "principal": int(principal),
+                "due_date": due_date_obj,
+                "payment_date": payment_date_obj,
                 "status": status,
                 "color": status_colors.get(status, "grey"),
             }
 
             loans.append(new_loan)
 
-            return LoanType(**new_loan)
+            return LoanType(
+                id=new_loan["id"],
+                name=new_loan["name"],
+                interestRate=new_loan["interest_rate"],
+                principal=new_loan["principal"],
+                dueDate=new_loan["due_date"].isoformat(),
+                paymentDate=(
+                    new_loan["payment_date"].isoformat()
+                    if new_loan["payment_date"]
+                    else None
+                ),
+                status=status,
+                color=new_loan["color"],
+            )
         except Exception as e:
-            raise Exception(f"Error adding loan: {str(e)}")
+            print(f"Mutation Error: {str(e)}")
+            print(traceback.format_exc())
+            raise
 
 
 class Mutation(graphene.ObjectType):
@@ -76,6 +107,7 @@ class Query(graphene.ObjectType):
     loans_with_payments = graphene.List(LoanType)
 
     def resolve_loans_with_payments(self, info):
+        result = []
         status_colors = {
             "On Time": "green",
             "Late": "orange",
@@ -83,22 +115,30 @@ class Query(graphene.ObjectType):
             "Unpaid": "grey",
         }
 
-        return [
-            LoanType(
-                id=loan["id"],
-                name=loan["name"],
-                interest_rate=loan["interest_rate"],
-                principal=loan["principal"],
-                due_date=loan["due_date"],
-                payment_date=loan["payment_date"],
-                status=get_payment_status(loan["due_date"], loan.get("payment_date")),
-                color=status_colors.get(
-                    get_payment_status(loan["due_date"], loan.get("payment_date")),
-                    "grey",
-                ),
+        for loan in loans:
+            # Ensure payment_date is converted to datetime if it's not None
+            payment_date = loan.get("payment_date")
+            due_date = loan["due_date"]
+
+            # Determine status based on actual data
+            status = (
+                get_payment_status(due_date, payment_date) if payment_date else "Unpaid"
             )
-            for loan in loans
-        ]
+
+            result.append(
+                LoanType(
+                    id=loan["id"],
+                    name=loan["name"],
+                    interestRate=loan["interest_rate"],
+                    principal=loan["principal"],
+                    dueDate=due_date.isoformat(),
+                    paymentDate=payment_date.isoformat() if payment_date else None,
+                    status=status,
+                    color=status_colors.get(status, "grey"),
+                )
+            )
+
+        return result
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

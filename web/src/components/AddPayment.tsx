@@ -25,7 +25,12 @@ export const AddPayment: React.FC = () => {
       });
       setFormErrors({});
     },
-    onError: (err) => console.error("Mutation Error:", err),
+    onError: (err) => {
+      console.error("Mutation Error Details:", err);
+      console.error("Error Message:", err.message);
+      console.error("GraphQL Errors:", err.graphQLErrors);
+      console.error("Network Error:", err.networkError);
+    },
   });
 
   const validateField = (name: string, value: string): string | null => {
@@ -69,13 +74,26 @@ export const AddPayment: React.FC = () => {
       }
     );
 
+    // Validate payment date
     if (formData.paymentDate) {
       const paymentDate = new Date(formData.paymentDate);
       const dueDate = new Date(formData.dueDate);
-      if (paymentDate > new Date())
+      const today = new Date();
+
+      // Remove time component for accurate date comparison
+      today.setHours(0, 0, 0, 0);
+      paymentDate.setHours(0, 0, 0, 0);
+      dueDate.setHours(0, 0, 0, 0);
+
+      // Check if payment date is in the future
+      if (paymentDate > today) {
         newErrors.paymentDate = "Payment date cannot be in the future";
-      if (paymentDate > dueDate)
+      }
+
+      // Check if payment date is after due date
+      if (paymentDate > dueDate) {
         newErrors.paymentDate = "Payment date cannot be after due date";
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -99,7 +117,14 @@ export const AddPayment: React.FC = () => {
       <form onSubmit={handleSubmit} className="add-loan-form">
         <h2>Add New Loan</h2>
 
-        {error && <div className="error-text">{error.message}</div>}
+        {error && (
+          <div className="error-text">
+            {error.message}
+            {error.graphQLErrors.map((err, index) => (
+              <div key={index}>{err.message}</div>
+            ))}
+          </div>
+        )}
         {loading && <LoadingSpinner />}
 
         <div className="form-group">
@@ -111,6 +136,9 @@ export const AddPayment: React.FC = () => {
             onChange={handleInputChange}
             disabled={loading}
           />
+          {formErrors.name && (
+            <div className="error-text">{formErrors.name}</div>
+          )}
         </div>
 
         <div className="form-group">
@@ -120,8 +148,12 @@ export const AddPayment: React.FC = () => {
             name="interestRate"
             value={formData.interestRate}
             onChange={handleInputChange}
+            step="0.1"
             disabled={loading}
           />
+          {formErrors.interestRate && (
+            <div className="error-text">{formErrors.interestRate}</div>
+          )}
         </div>
 
         <div className="form-group">
@@ -133,6 +165,9 @@ export const AddPayment: React.FC = () => {
             onChange={handleInputChange}
             disabled={loading}
           />
+          {formErrors.principal && (
+            <div className="error-text">{formErrors.principal}</div>
+          )}
         </div>
 
         <div className="form-group">
@@ -142,8 +177,27 @@ export const AddPayment: React.FC = () => {
             name="dueDate"
             value={formData.dueDate}
             onChange={handleInputChange}
+            max={new Date().toISOString().split("T")[0]} // Prevent future due dates
             disabled={loading}
           />
+          {formErrors.dueDate && (
+            <div className="error-text">{formErrors.dueDate}</div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label>Payment Date (Optional)</label>
+          <input
+            type="date"
+            name="paymentDate"
+            value={formData.paymentDate}
+            onChange={handleInputChange}
+            max={new Date().toISOString().split("T")[0]} // Prevent future payment dates
+            disabled={loading}
+          />
+          {formErrors.paymentDate && (
+            <div className="error-text">{formErrors.paymentDate}</div>
+          )}
         </div>
 
         <button type="submit" className="submit-button" disabled={loading}>
