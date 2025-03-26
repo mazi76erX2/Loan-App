@@ -41,15 +41,13 @@ This project provides an intuitive interface for managing loans and payments wit
 
 2. Start the backend server:
    ```bash
-   cd server
-   docker-compose up --build
+   make start-server
    ```
 
 3. Start the frontend:
    ```bash
-   cd web
-   npm install
-   npm run dev
+   make install-web
+   make start-web
    ```
 
 4. Open your browser:

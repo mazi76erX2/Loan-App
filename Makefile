@@ -5,6 +5,9 @@ all: start-server start-web
 start-server:
 	cd server && docker-compose up --build
 
+install-web:
+	cd web && npm install
+
 start-web:
 	cd web && npm run dev
 
