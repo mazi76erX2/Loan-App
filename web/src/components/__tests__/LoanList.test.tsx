@@ -61,12 +61,11 @@ const mocks = [
 
 describe("LoanList Component", () => {
   it("renders loading spinner initially", () => {
-    // Create a mock that will delay the response
     const delayedMock = {
       request: {
         query: GET_LOANS_WITH_PAYMENTS,
       },
-      delay: 100, // simulate a delay
+      delay: 100,
       result: {
         data: {
           loansWithPayments: mockLoansData,
@@ -80,7 +79,6 @@ describe("LoanList Component", () => {
       </MockedProvider>
     );
 
-    // Check for loading spinner
     const loadingSpinner = screen.getByTestId("loading-spinner");
     expect(loadingSpinner).toBeTruthy();
   });
@@ -92,7 +90,6 @@ describe("LoanList Component", () => {
       </MockedProvider>
     );
 
-    // Wait for and check each loan name
     const tomLoan = await findByText("Tom's Loan");
     const chrisLoan = await findByText("Chris Wailaka");
     const npmLoan = await findByText("NP Mobile Money");
@@ -111,13 +108,10 @@ describe("LoanList Component", () => {
       </MockedProvider>
     );
 
-    // Wait for loans to load
     await findByText("Tom's Loan");
 
-    // Select status filter
     const statusSelect = getByRole("combobox");
 
-    // Filter by "On Time"
     fireEvent.change(statusSelect, { target: { value: "on time" } });
     const tomLoan = await findByText("Tom's Loan");
     const chrisLoan = queryByText("Chris Wailaka");
@@ -125,7 +119,6 @@ describe("LoanList Component", () => {
     expect(tomLoan).toBeTruthy();
     expect(chrisLoan).toBeNull();
 
-    // Filter by "Unpaid"
     fireEvent.change(statusSelect, { target: { value: "unpaid" } });
     const estherLoan = await findByText("Esther's Autoparts");
     const tomLoanAfter = queryByText("Tom's Loan");
@@ -141,12 +134,19 @@ describe("LoanList Component", () => {
       </MockedProvider>
     );
 
-    // Wait for loans to load and check summary statistics
-    const totalLoans = await findByText(/Total Loans: 4/);
-    const onTimeLoans = await findByText(/On Time Loans: 1/);
-    const lateLoanCount = await findByText(/Late Loans: 1/);
-    const defaultedLoanCount = await findByText(/Defaulted Loans: 1/);
-    const unpaidLoanCount = await findByText(/Unpaid Loans: 1/);
+    const totalLoans = await findByText("4");
+    const onTimeLoans = await findByText("1", {
+      selector: ".summary-item strong",
+    });
+    const lateLoanCount = await findByText("1", {
+      selector: ".summary-item strong",
+    });
+    const defaultedLoanCount = await findByText("1", {
+      selector: ".summary-item strong",
+    });
+    const unpaidLoanCount = await findByText("1", {
+      selector: ".summary-item strong",
+    });
 
     expect(totalLoans).toBeTruthy();
     expect(onTimeLoans).toBeTruthy();

@@ -19,7 +19,7 @@ const mockAddLoanMutation = {
   },
   result: {
     data: {
-      add_loan: {
+      addLoan: {
         id: "5",
         name: "Test Loan",
         interestRate: 5.0,
@@ -41,17 +41,11 @@ describe("AddPayment Component", () => {
       </MockedProvider>
     );
 
-    const loanNameInput = getByLabelText(/Loan Name/i);
-    const interestRateInput = getByLabelText(/Interest Rate/i);
-    const principalInput = getByLabelText(/Principal Amount/i);
-    const dueDateInput = getByLabelText(/Due Date/i);
-    const paymentDateInput = getByLabelText(/Payment Date/i);
-
-    expect(loanNameInput).toBeTruthy();
-    expect(interestRateInput).toBeTruthy();
-    expect(principalInput).toBeTruthy();
-    expect(dueDateInput).toBeTruthy();
-    expect(paymentDateInput).toBeTruthy();
+    expect(getByLabelText("Loan Name")).toBeTruthy();
+    expect(getByLabelText("Interest Rate")).toBeTruthy();
+    expect(getByLabelText("Principal Amount")).toBeTruthy();
+    expect(getByLabelText("Due Date")).toBeTruthy();
+    expect(getByLabelText("Payment Date")).toBeTruthy();
   });
 
   it("validates form inputs", async () => {
@@ -64,7 +58,6 @@ describe("AddPayment Component", () => {
     const submitButton = getByText(/Add Loan/i);
     fireEvent.click(submitButton);
 
-    // Check for validation errors
     const loanNameError = await screen.findByText(/Loan name is required/i);
     const interestRateError = await screen.findByText(
       /Interest rate must be between 0 and 100/i
@@ -89,7 +82,7 @@ describe("AddPayment Component", () => {
         },
         result: {
           data: {
-            loans_with_payments: [],
+            loansWithPayments: [],
           },
         },
       },
@@ -101,24 +94,22 @@ describe("AddPayment Component", () => {
       </MockedProvider>
     );
 
-    // Fill out form
-    fireEvent.change(getByLabelText(/Loan Name/i), {
+    fireEvent.change(getByLabelText("Loan Name"), {
       target: { value: "Test Loan" },
     });
-    fireEvent.change(getByLabelText(/Interest Rate/i), {
+    fireEvent.change(getByLabelText("Interest Rate"), {
       target: { value: "5.0" },
     });
-    fireEvent.change(getByLabelText(/Principal Amount/i), {
+    fireEvent.change(getByLabelText("Principal Amount"), {
       target: { value: "10000" },
     });
-    fireEvent.change(getByLabelText(/Due Date/i), {
+    fireEvent.change(getByLabelText("Due Date"), {
       target: { value: "2025-06-01" },
     });
 
     const submitButton = getByText(/Add Loan/i);
     fireEvent.click(submitButton);
 
-    // Wait for mutation to complete
     await screen.findByText(/Add Loan/i);
     const loadingText = queryByText(/Adding Loan.../i);
 

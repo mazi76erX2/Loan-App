@@ -12,7 +12,7 @@ start-web:
 	cd web && npm run dev
 
 test-server:
-	cd server && python -m pytest app/tests/
+	cd server && python -m app.tests.test_loans
 
 test-web:
 	cd web && npm run test

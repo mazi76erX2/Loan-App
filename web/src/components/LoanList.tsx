@@ -21,19 +21,15 @@ export const LoanList: React.FC = () => {
   if (loading) return <LoadingSpinner />;
   if (error) return <p className="error-message">Error: {error.message}</p>;
 
-  // Add a safe check for data and loansWithPayments
   const loans = data?.loansWithPayments || [];
 
-  // Filter loans based on status
   const filteredLoans = loans.filter(
     (loan: LoanType) =>
       filter === "all" || loan.status.toLowerCase() === filter.toLowerCase()
   );
 
-  // Status filter options
   const statusOptions = ["all", "on time", "late", "defaulted", "unpaid"];
 
-  // Calculate status counts
   const statusCounts = loans.reduce(
     (acc: any, loan: LoanType) => {
       const status = loan.status.toLowerCase();
@@ -53,10 +49,10 @@ export const LoanList: React.FC = () => {
     <div className="loan-list-container">
       <h2>Existing Loans</h2>
 
-      {/* Status Filter */}
       <div className="loan-filter">
-        <label>Filter by Status: </label>
+        <label htmlFor="status-filter">Filter by Status: </label>
         <select
+          id="status-filter"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="status-select"
@@ -69,7 +65,6 @@ export const LoanList: React.FC = () => {
         </select>
       </div>
 
-      {/* Loans Table */}
       <table className="loans-table">
         <thead>
           <tr>
@@ -99,16 +94,8 @@ export const LoanList: React.FC = () => {
                 <td>
                   <div
                     className="status-indicator"
-                    style={{
-                      backgroundColor: loan.color,
-                      display: "inline-block",
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      marginRight: "8px",
-                      verticalAlign: "middle",
-                    }}
-                  ></div>
+                    style={{ backgroundColor: loan.color }}
+                  />
                   {loan.status}
                 </td>
                 <td>{loan.name}</td>
@@ -126,9 +113,12 @@ export const LoanList: React.FC = () => {
         </tbody>
       </table>
 
-      {/* Summary Statistics */}
       <div className="loan-summary">
-        {statusOptions.map((status) => (
+        <div className="summary-item">
+          <span>Total Loans:</span>
+          <strong>{loans.length}</strong>
+        </div>
+        {statusOptions.slice(1).map((status) => (
           <div key={status} className="summary-item">
             <span>
               {status.charAt(0).toUpperCase() + status.slice(1)} Loans:

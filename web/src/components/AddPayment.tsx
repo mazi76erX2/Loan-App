@@ -25,12 +25,7 @@ export const AddPayment: React.FC = () => {
       });
       setFormErrors({});
     },
-    onError: (err) => {
-      console.error("Mutation Error Details:", err);
-      console.error("Error Message:", err.message);
-      console.error("GraphQL Errors:", err.graphQLErrors);
-      console.error("Network Error:", err.networkError);
-    },
+    onError: (err) => console.error("Mutation Error:", err),
   });
 
   const validateField = (name: string, value: string): string | null => {
@@ -74,26 +69,13 @@ export const AddPayment: React.FC = () => {
       }
     );
 
-    // Validate payment date
     if (formData.paymentDate) {
       const paymentDate = new Date(formData.paymentDate);
       const dueDate = new Date(formData.dueDate);
-      const today = new Date();
-
-      // Remove time component for accurate date comparison
-      today.setHours(0, 0, 0, 0);
-      paymentDate.setHours(0, 0, 0, 0);
-      dueDate.setHours(0, 0, 0, 0);
-
-      // Check if payment date is in the future
-      if (paymentDate > today) {
+      if (paymentDate > new Date())
         newErrors.paymentDate = "Payment date cannot be in the future";
-      }
-
-      // Check if payment date is after due date
-      if (paymentDate > dueDate) {
+      if (paymentDate > dueDate)
         newErrors.paymentDate = "Payment date cannot be after due date";
-      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -117,24 +99,19 @@ export const AddPayment: React.FC = () => {
       <form onSubmit={handleSubmit} className="add-loan-form">
         <h2>Add New Loan</h2>
 
-        {error && (
-          <div className="error-text">
-            {error.message}
-            {error.graphQLErrors.map((err, index) => (
-              <div key={index}>{err.message}</div>
-            ))}
-          </div>
-        )}
+        {error && <div className="error-text">{error.message}</div>}
         {loading && <LoadingSpinner />}
 
         <div className="form-group">
-          <label>Loan Name</label>
+          <label htmlFor="name">Loan Name</label>
           <input
+            id="name"
             type="text"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
             disabled={loading}
+            aria-label="Loan Name"
           />
           {formErrors.name && (
             <div className="error-text">{formErrors.name}</div>
@@ -142,14 +119,16 @@ export const AddPayment: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label>Interest Rate (%)</label>
+          <label htmlFor="interestRate">Interest Rate (%)</label>
           <input
+            id="interestRate"
             type="number"
             name="interestRate"
             value={formData.interestRate}
             onChange={handleInputChange}
             step="0.1"
             disabled={loading}
+            aria-label="Interest Rate"
           />
           {formErrors.interestRate && (
             <div className="error-text">{formErrors.interestRate}</div>
@@ -157,13 +136,15 @@ export const AddPayment: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label>Principal Amount</label>
+          <label htmlFor="principal">Principal Amount</label>
           <input
+            id="principal"
             type="number"
             name="principal"
             value={formData.principal}
             onChange={handleInputChange}
             disabled={loading}
+            aria-label="Principal Amount"
           />
           {formErrors.principal && (
             <div className="error-text">{formErrors.principal}</div>
@@ -171,14 +152,15 @@ export const AddPayment: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label>Due Date</label>
+          <label htmlFor="dueDate">Due Date</label>
           <input
+            id="dueDate"
             type="date"
             name="dueDate"
             value={formData.dueDate}
             onChange={handleInputChange}
-            max={new Date().toISOString().split("T")[0]} // Prevent future due dates
             disabled={loading}
+            aria-label="Due Date"
           />
           {formErrors.dueDate && (
             <div className="error-text">{formErrors.dueDate}</div>
@@ -186,14 +168,15 @@ export const AddPayment: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label>Payment Date (Optional)</label>
+          <label htmlFor="paymentDate">Payment Date (Optional)</label>
           <input
+            id="paymentDate"
             type="date"
             name="paymentDate"
             value={formData.paymentDate}
             onChange={handleInputChange}
-            max={new Date().toISOString().split("T")[0]} // Prevent future payment dates
             disabled={loading}
+            aria-label="Payment Date"
           />
           {formErrors.paymentDate && (
             <div className="error-text">{formErrors.paymentDate}</div>

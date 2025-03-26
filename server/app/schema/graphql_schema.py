@@ -29,20 +29,17 @@ class AddLoanMutation(graphene.Mutation):
     @staticmethod
     def mutate(root, info, **kwargs):
         try:
-            print("Received mutation arguments:", kwargs)  # Debug print
+            print("Received mutation arguments:", kwargs)
 
-            # Extract arguments with default values
             name = kwargs.get("name")
             interest_rate = kwargs.get("interestRate")
             principal = kwargs.get("principal")
             due_date = kwargs.get("dueDate")
             payment_date = kwargs.get("paymentDate", None)
 
-            # Validate required fields
             if not all([name, interest_rate is not None, principal, due_date]):
                 raise ValueError("Missing required fields")
 
-            # Convert dates
             due_date_obj = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
             payment_date_obj = (
                 datetime.datetime.strptime(payment_date, "%Y-%m-%d").date()
@@ -50,14 +47,21 @@ class AddLoanMutation(graphene.Mutation):
                 else None
             )
 
-            # Determine status
+            today = datetime.date.today()
+
+            if payment_date_obj:
+                if payment_date_obj > today:
+                    raise ValueError("Payment date cannot be in the future")
+
+                if payment_date_obj > due_date_obj:
+                    raise ValueError("Payment date cannot be after due date")
+
             status = (
                 get_payment_status(due_date_obj, payment_date_obj)
                 if payment_date_obj
                 else "Unpaid"
             )
 
-            # Define color mapping
             status_colors = {
                 "On Time": "green",
                 "Late": "orange",
@@ -65,7 +69,6 @@ class AddLoanMutation(graphene.Mutation):
                 "Unpaid": "grey",
             }
 
-            # Create new loan
             new_loan = {
                 "id": len(loans) + 1,
                 "name": name,
@@ -116,11 +119,9 @@ class Query(graphene.ObjectType):
         }
 
         for loan in loans:
-            # Ensure payment_date is converted to datetime if it's not None
             payment_date = loan.get("payment_date")
             due_date = loan["due_date"]
 
-            # Determine status based on actual data
             status = (
                 get_payment_status(due_date, payment_date) if payment_date else "Unpaid"
             )
