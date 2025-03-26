@@ -1,5 +1,7 @@
 # Loan Management System
 
+![Site Home Page](homepage.png)
+
 This project provides an intuitive interface for managing loans and payments with real-time updates.
 
 ## 🌟 Features
