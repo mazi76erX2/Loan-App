@@ -1,54 +1,117 @@
-import datetime
 from flask import Blueprint, jsonify, request
-from app.models.loan import add_payment
+from app.data.loans import loans
+from app.utils.helpers import get_payment_status
+import datetime
 
 api_bp = Blueprint("api", __name__)
 
 
-@api_bp.route("/api/payments", methods=["POST"])
-def handle_add_payment():
-    try:
-        payment_data = request.json
+@api_bp.route("/")
+def home():
+    """
+    Home route providing basic API information
+    """
+    return jsonify(
+        {
+            "message": "Welcome to the Loan Management API",
+            "total_loans": len(loans),
+            "endpoints": {"graphql": "/graphql", "home": "/"},
+        }
+    )
 
-        # Validate input
-        if not payment_data:
-            return jsonify({"error": "No payment data provided"}), 400
 
-        # Validate loan_id exists and is an integer
-        if not isinstance(payment_data.get("loan_id"), int):
-            return jsonify({"error": "Invalid loan_id. Must be an integer."}), 400
-
-        # Validate loan_id exists in loans
-        from app.data.loans import loans
-
-        if not any(loan["id"] == payment_data["loan_id"] for loan in loans):
-            return jsonify({"error": "Loan ID does not exist"}), 404
-
-        # Validate payment date
-        if "payment_date" in payment_data:
-            try:
-                datetime.datetime.strptime(payment_data["payment_date"], "%Y-%m-%d")
-            except ValueError:
-                return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
-
-        new_payment = add_payment(payment_data)
-        return (
-            jsonify(
-                {
-                    "message": "Payment added successfully",
-                    "payment": {
-                        "id": new_payment["id"],
-                        "loan_id": new_payment["loan_id"],
-                        "payment_date": new_payment["payment_date"].isoformat(),
-                    },
-                }
-            ),
-            201,
+@api_bp.route("/loans", methods=["GET"])
+def get_all_loans():
+    """
+    REST endpoint to retrieve all loans
+    """
+    loan_list = []
+    for loan in loans:
+        loan_data = loan.copy()
+        loan_data["due_date"] = loan_data["due_date"].isoformat()
+        loan_data["payment_date"] = (
+            loan_data["payment_date"].isoformat() if loan_data["payment_date"] else None
         )
-
-    except Exception as e:
-        # Catch-all for unexpected errors
-        return (
-            jsonify({"error": "An unexpected error occurred", "details": str(e)}),
-            500,
+        loan_data["status"] = get_payment_status(
+            loan["due_date"], loan.get("payment_date")
         )
+        loan_list.append(loan_data)
+
+    return jsonify(loan_list)
+
+
+@api_bp.route("/loans/<int:loan_id>", methods=["GET"])
+def get_loan_by_id(loan_id):
+    """
+    REST endpoint to retrieve a specific loan by ID
+    """
+    loan = next((loan for loan in loans if loan["id"] == loan_id), None)
+
+    if not loan:
+        return jsonify({"error": "Loan not found"}), 404
+
+    loan_data = loan.copy()
+    loan_data["due_date"] = loan_data["due_date"].isoformat()
+    loan_data["payment_date"] = (
+        loan_data["payment_date"].isoformat() if loan_data["payment_date"] else None
+    )
+    loan_data["status"] = get_payment_status(loan["due_date"], loan.get("payment_date"))
+
+    return jsonify(loan_data)
+
+
+@api_bp.route("/loans/status/<status>", methods=["GET"])
+def get_loans_by_status(status):
+    """
+    REST endpoint to retrieve loans by status
+    """
+    status = status.replace("-", " ").title()
+    filtered_loans = []
+
+    for loan in loans:
+        loan_status = get_payment_status(loan["due_date"], loan.get("payment_date"))
+
+        if loan_status.lower() == status.lower():
+            loan_data = loan.copy()
+            loan_data["due_date"] = loan_data["due_date"].isoformat()
+            loan_data["payment_date"] = (
+                loan_data["payment_date"].isoformat()
+                if loan_data["payment_date"]
+                else None
+            )
+            loan_data["status"] = loan_status
+            filtered_loans.append(loan_data)
+
+    return jsonify(filtered_loans)
+
+
+@api_bp.errorhandler(404)
+def not_found(error):
+    """
+    Custom 404 error handler
+    """
+    return (
+        jsonify(
+            {
+                "error": "Not Found",
+                "message": "The requested resource could not be found",
+            }
+        ),
+        404,
+    )
+
+
+@api_bp.errorhandler(500)
+def server_error(error):
+    """
+    Custom 500 error handler
+    """
+    return (
+        jsonify(
+            {
+                "error": "Internal Server Error",
+                "message": "Something went wrong on the server",
+            }
+        ),
+        500,
+    )

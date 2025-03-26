@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const GET_LOANS_WITH_PAYMENTS = gql`
   query GetLoansWithPayments {
-    loansWithPayments {
+    loans_with_payments {
       id
       name
       interestRate
@@ -10,16 +10,34 @@ export const GET_LOANS_WITH_PAYMENTS = gql`
       dueDate
       paymentDate
       status
+      color
     }
   }
 `;
 
-export const ADD_PAYMENT_MUTATION = gql`
-  mutation AddPayment($loanId: Int!, $paymentDate: String) {
-    addPayment(loanId: $loanId, paymentDate: $paymentDate) {
+export const ADD_LOAN_MUTATION = gql`
+  mutation AddLoan(
+    $name: String!
+    $interestRate: Float!
+    $principal: Int!
+    $dueDate: String!
+    $paymentDate: String
+  ) {
+    add_loan(
+      name: $name
+      interest_rate: $interestRate
+      principal: $principal
+      due_date: $dueDate
+      payment_date: $paymentDate
+    ) {
       id
-      loanId
+      name
+      interestRate
+      principal
+      dueDate
       paymentDate
+      status
+      color
     }
   }
 `;
