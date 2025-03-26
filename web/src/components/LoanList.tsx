@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@apollo/client";
 import { GET_LOANS_WITH_PAYMENTS } from "../graphql/queries";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 type LoanType = {
   id: string;
@@ -16,7 +17,7 @@ type LoanType = {
 export const LoanList: React.FC = () => {
   const { loading, error, data } = useQuery(GET_LOANS_WITH_PAYMENTS);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <LoadingSpinner />;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
@@ -34,20 +35,16 @@ export const LoanList: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {data.loansWithPayments.map(
-            (
-              loan: LoanType // Update the type annotation
-            ) => (
-              <tr key={loan.id} style={{ backgroundColor: loan.color }}>
-                <td>{loan.name}</td>
-                <td>${loan.principal}</td>
-                <td>{loan.interestRate}%</td>
-                <td>{loan.dueDate}</td>
-                <td>{loan.paymentDate || "Not Paid"}</td>
-                <td>{loan.status}</td>
-              </tr>
-            )
-          )}
+          {data.loansWithPayments.map((loan: LoanType) => (
+            <tr key={loan.id} style={{ backgroundColor: loan.color }}>
+              <td>{loan.name}</td>
+              <td>${loan.principal}</td>
+              <td>{loan.interestRate}%</td>
+              <td>{loan.dueDate}</td>
+              <td>{loan.paymentDate || "Not Paid"}</td>
+              <td>{loan.status}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

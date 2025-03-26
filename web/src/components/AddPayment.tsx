@@ -4,6 +4,7 @@ import {
   ADD_PAYMENT_MUTATION,
   GET_LOANS_WITH_PAYMENTS,
 } from "../graphql/queries";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 export const AddPayment: React.FC = () => {
   const [loanId, setLoanId] = useState("");
@@ -85,7 +86,14 @@ export const AddPayment: React.FC = () => {
           Unexpected error: {error.message}
         </div>
       )}
-      <form onSubmit={handleSubmit}>
+      {loading && <LoadingSpinner />}
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          opacity: loading ? 0.5 : 1,
+          pointerEvents: loading ? "none" : "auto",
+        }}
+      >
         <div>
           <label>Loan ID:</label>
           <input
@@ -93,6 +101,7 @@ export const AddPayment: React.FC = () => {
             value={loanId}
             onChange={(e) => setLoanId(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
         <div>
@@ -102,6 +111,7 @@ export const AddPayment: React.FC = () => {
             value={paymentDate}
             onChange={(e) => setPaymentDate(e.target.value)}
             max={new Date().toISOString().split("T")[0]}
+            disabled={loading}
           />
         </div>
         <button type="submit" disabled={loading}>

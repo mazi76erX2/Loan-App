@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { toBeInTheDocument } from "@testing-library/jest-dom/matchers";
 import { MockedProvider } from "@apollo/client/testing";
 import { LoanList } from "../LoanList";
 import { GET_LOANS_WITH_PAYMENTS } from "../../graphql/queries";
@@ -13,6 +12,7 @@ const mockLoansData = [
     dueDate: "2025-03-01",
     paymentDate: "2025-03-04",
     status: "On Time",
+    color: "green",
   },
   {
     id: 2,
@@ -22,6 +22,7 @@ const mockLoansData = [
     dueDate: "2025-03-01",
     paymentDate: "2025-03-15",
     status: "Late",
+    color: "orange",
   },
   {
     id: 3,
@@ -31,6 +32,7 @@ const mockLoansData = [
     dueDate: "2025-03-01",
     paymentDate: "2025-04-05",
     status: "Defaulted",
+    color: "red",
   },
   {
     id: 4,
@@ -40,6 +42,7 @@ const mockLoansData = [
     dueDate: "2025-03-01",
     paymentDate: null,
     status: "Unpaid",
+    color: "grey",
   },
 ];
 
@@ -57,6 +60,17 @@ const mocks = [
 ];
 
 describe("LoanList Component", () => {
+  it("handles loading state", () => {
+    render(
+      <MockedProvider mocks={mocks} addTypename={false}>
+        <LoanList />
+      </MockedProvider>
+    );
+
+    const loadingSpinner = screen.getByTestId("loading-spinner");
+    expect(loadingSpinner).toBeTruthy();
+  });
+
   it("renders loans with correct details", async () => {
     render(
       <MockedProvider mocks={mocks} addTypename={false}>
@@ -66,15 +80,20 @@ describe("LoanList Component", () => {
 
     // Wait for the loans to load
     const tomLoan = await screen.findByText("Tom's Loan");
-    expect.extend({ toBeInTheDocument });
-
-    expect(tomLoan).toBeInTheDocument();
+    expect(tomLoan).toBeTruthy();
 
     // Verify all loan names are present
-    expect(screen.getByText("Tom's Loan")).toBeInTheDocument();
-    expect(screen.getByText("Chris Wailaka")).toBeInTheDocument();
-    expect(screen.getByText("NP Mobile Money")).toBeInTheDocument();
-    expect(screen.getByText("Esther's Autoparts")).toBeInTheDocument();
+    const loanNames = [
+      "Tom's Loan",
+      "Chris Wailaka",
+      "NP Mobile Money",
+      "Esther's Autoparts",
+    ];
+
+    loanNames.forEach((name) => {
+      const nameElement = screen.getByText(name);
+      expect(nameElement).toBeTruthy();
+    });
   });
 
   it("displays correct loan details", async () => {
@@ -88,8 +107,12 @@ describe("LoanList Component", () => {
     await screen.findByText("Tom's Loan");
 
     // Check specific loan details
-    expect(screen.getByText("$10000")).toBeInTheDocument();
-    expect(screen.getByText("5.0%")).toBeInTheDocument();
-    expect(screen.getByText("On Time")).toBeInTheDocument();
+    const principalElement = screen.getByText("$10000");
+    const interestRateElement = screen.getByText("5.0%");
+    const statusElement = screen.getByText("On Time");
+
+    expect(principalElement).toBeTruthy();
+    expect(interestRateElement).toBeTruthy();
+    expect(statusElement).toBeTruthy();
   });
 });
