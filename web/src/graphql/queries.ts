@@ -25,10 +25,10 @@ export const ADD_LOAN_MUTATION = gql`
   ) {
     addLoan(
       name: $name
-      interest_rate: $interestRate
+      interestRate: $interestRate
       principal: $principal
-      due_date: $dueDate
-      payment_date: $paymentDate
+      dueDate: $dueDate
+      paymentDate: $paymentDate
     ) {
       id
       name

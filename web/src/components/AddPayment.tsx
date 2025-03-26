@@ -16,7 +16,6 @@ export const AddPayment: React.FC = () => {
   const [addLoan, { loading, error }] = useMutation(ADD_LOAN_MUTATION, {
     refetchQueries: [{ query: GET_LOANS_WITH_PAYMENTS }],
     onCompleted: () => {
-      // Reset form
       setFormData({
         name: "",
         interestRate: "",
@@ -26,9 +25,7 @@ export const AddPayment: React.FC = () => {
       });
       setFormErrors({});
     },
-    onError: (err) => {
-      console.error("Mutation Error:", err);
-    },
+    onError: (err) => console.error("Mutation Error:", err),
   });
 
   const validateField = (name: string, value: string): string | null => {
@@ -54,23 +51,15 @@ export const AddPayment: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    const error = validateField(name, value);
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setFormErrors((prev) => ({
       ...prev,
-      [name]: error || "",
+      [name]: validateField(name, value) || "",
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const newErrors: { [key: string]: string } = {};
 
     (["name", "interestRate", "principal", "dueDate"] as const).forEach(
@@ -83,14 +72,10 @@ export const AddPayment: React.FC = () => {
     if (formData.paymentDate) {
       const paymentDate = new Date(formData.paymentDate);
       const dueDate = new Date(formData.dueDate);
-
-      if (paymentDate > new Date()) {
+      if (paymentDate > new Date())
         newErrors.paymentDate = "Payment date cannot be in the future";
-      }
-
-      if (paymentDate > dueDate) {
+      if (paymentDate > dueDate)
         newErrors.paymentDate = "Payment date cannot be after due date";
-      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -114,18 +99,9 @@ export const AddPayment: React.FC = () => {
       <form onSubmit={handleSubmit} className="add-loan-form">
         <h2>Add New Loan</h2>
 
-        {error && (
-          <div
-            className="error-text"
-            style={{ color: "red", marginBottom: "15px" }}
-          >
-            {error.message}
-          </div>
-        )}
-
+        {error && <div className="error-text">{error.message}</div>}
         {loading && <LoadingSpinner />}
 
-        {/* Name Input */}
         <div className="form-group">
           <label>Loan Name</label>
           <input
@@ -133,15 +109,10 @@ export const AddPayment: React.FC = () => {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className={formErrors.name ? "input-error" : ""}
             disabled={loading}
           />
-          {formErrors.name && (
-            <span className="error-text">{formErrors.name}</span>
-          )}
         </div>
 
-        {/* Interest Rate Input */}
         <div className="form-group">
           <label>Interest Rate (%)</label>
           <input
@@ -149,16 +120,10 @@ export const AddPayment: React.FC = () => {
             name="interestRate"
             value={formData.interestRate}
             onChange={handleInputChange}
-            step="0.1"
-            className={formErrors.interestRate ? "input-error" : ""}
             disabled={loading}
           />
-          {formErrors.interestRate && (
-            <span className="error-text">{formErrors.interestRate}</span>
-          )}
         </div>
 
-        {/* Principal Input */}
         <div className="form-group">
           <label>Principal Amount</label>
           <input
@@ -166,15 +131,10 @@ export const AddPayment: React.FC = () => {
             name="principal"
             value={formData.principal}
             onChange={handleInputChange}
-            className={formErrors.principal ? "input-error" : ""}
             disabled={loading}
           />
-          {formErrors.principal && (
-            <span className="error-text">{formErrors.principal}</span>
-          )}
         </div>
 
-        {/* Due Date Input */}
         <div className="form-group">
           <label>Due Date</label>
           <input
@@ -182,32 +142,10 @@ export const AddPayment: React.FC = () => {
             name="dueDate"
             value={formData.dueDate}
             onChange={handleInputChange}
-            min={new Date().toISOString().split("T")[0]}
-            className={formErrors.dueDate ? "input-error" : ""}
             disabled={loading}
           />
-          {formErrors.dueDate && (
-            <span className="error-text">{formErrors.dueDate}</span>
-          )}
         </div>
 
-        {/* Payment Date Input */}
-        <div className="form-group">
-          <label>Payment Date (Optional)</label>
-          <input
-            type="date"
-            name="paymentDate"
-            value={formData.paymentDate}
-            onChange={handleInputChange}
-            max={new Date().toISOString().split("T")[0]}
-            disabled={loading}
-          />
-          {formErrors.paymentDate && (
-            <span className="error-text">{formErrors.paymentDate}</span>
-          )}
-        </div>
-
-        {/* Submit Button */}
         <button type="submit" className="submit-button" disabled={loading}>
           {loading ? "Adding Loan..." : "Add Loan"}
         </button>

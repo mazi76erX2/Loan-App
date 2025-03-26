@@ -11,8 +11,8 @@ function App() {
         <h1>Loan Management System</h1>
       </header>
       <main>
-        <AddPayment />
         <LoanList />
+        <AddPayment />
       </main>
     </div>
   );
