@@ -128,30 +128,18 @@ describe("LoanList Component", () => {
   });
 
   it("displays summary statistics", async () => {
-    const { findByText } = render(
+    const { findByText, getAllByText } = render(
       <MockedProvider mocks={mocks} addTypename={false}>
         <LoanList />
       </MockedProvider>
     );
 
-    const totalLoans = await findByText("4");
-    const onTimeLoans = await findByText("1", {
-      selector: ".summary-item strong",
-    });
-    const lateLoanCount = await findByText("1", {
-      selector: ".summary-item strong",
-    });
-    const defaultedLoanCount = await findByText("1", {
-      selector: ".summary-item strong",
-    });
-    const unpaidLoanCount = await findByText("1", {
-      selector: ".summary-item strong",
-    });
+    await findByText("Tom's Loan");
+
+    const totalLoans = getAllByText("4")[0];
+    const statusCounts = getAllByText("1");
 
     expect(totalLoans).toBeTruthy();
-    expect(onTimeLoans).toBeTruthy();
-    expect(lateLoanCount).toBeTruthy();
-    expect(defaultedLoanCount).toBeTruthy();
-    expect(unpaidLoanCount).toBeTruthy();
+    expect(statusCounts.length).toBe(4);
   });
 });
