@@ -54,7 +54,7 @@ This project provides an intuitive interface for managing loans and payments wit
 
 4. Open your browser:
    - **Backend GraphQL**: [http://localhost:2024/graphql](http://localhost:2024/graphql)
-   - **Frontend**: [http://localhost:3000](http://localhost:3000)
+   - **Frontend**: [http://localhost:5173](http://localhost:5172)
 
 ## 🫠 Technologies Used
 
@@ -72,7 +72,7 @@ This project provides an intuitive interface for managing loans and payments wit
 - Docker
 
 ### Testing
-- Jest
+- Vite Test
 - React Testing Library
 - Unittest
 
