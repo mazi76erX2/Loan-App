@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const GET_LOANS_WITH_PAYMENTS = gql`
   query GetLoansWithPayments {
-    loans_with_payments {
+    loansWithPayments {
       id
       name
       interestRate
@@ -23,7 +23,7 @@ export const ADD_LOAN_MUTATION = gql`
     $dueDate: String!
     $paymentDate: String
   ) {
-    add_loan(
+    addLoan(
       name: $name
       interest_rate: $interestRate
       principal: $principal

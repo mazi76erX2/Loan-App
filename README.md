@@ -141,6 +141,8 @@ For a real-world application, several improvements should be made:
 - **Automatic Refetching**: Add automatic refetching after mutations to keep the UI in sync
 - **Pagination**: Implement pagination for large datasets (e.g., Relay, Apollo Client's pagination)
 - **Error Handling**: Add more comprehensive error handling and logging (e.g., Sentry, Rollbar, etc.)
+- **Testing**: Enhance test coverage and add more end-to-end tests (e.g., Cypress, Playwright, etc.)
+- **Improve styling**: Improve the overall look and feel of the application using a library like Tailwind CSS or Material UI.
 
 ## 👨‍💻 Author
 

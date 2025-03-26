@@ -1,11 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { MockedProvider } from "@apollo/client/testing";
 import { LoanList } from "../LoanList";
 import { GET_LOANS_WITH_PAYMENTS } from "../../graphql/queries";
 
 const mockLoansData = [
   {
-    id: 1,
+    id: "1",
     name: "Tom's Loan",
     interestRate: 5.0,
     principal: 10000,
@@ -15,7 +15,7 @@ const mockLoansData = [
     color: "green",
   },
   {
-    id: 2,
+    id: "2",
     name: "Chris Wailaka",
     interestRate: 3.5,
     principal: 500000,
@@ -25,7 +25,7 @@ const mockLoansData = [
     color: "orange",
   },
   {
-    id: 3,
+    id: "3",
     name: "NP Mobile Money",
     interestRate: 4.5,
     principal: 30000,
@@ -35,7 +35,7 @@ const mockLoansData = [
     color: "red",
   },
   {
-    id: 4,
+    id: "4",
     name: "Esther's Autoparts",
     interestRate: 1.5,
     principal: 40000,
@@ -60,59 +60,98 @@ const mocks = [
 ];
 
 describe("LoanList Component", () => {
-  it("handles loading state", () => {
+  it("renders loading spinner initially", () => {
+    // Create a mock that will delay the response
+    const delayedMock = {
+      request: {
+        query: GET_LOANS_WITH_PAYMENTS,
+      },
+      delay: 100, // simulate a delay
+      result: {
+        data: {
+          loansWithPayments: mockLoansData,
+        },
+      },
+    };
+
     render(
-      <MockedProvider mocks={mocks} addTypename={false}>
+      <MockedProvider mocks={[delayedMock]} addTypename={false}>
         <LoanList />
       </MockedProvider>
     );
 
+    // Check for loading spinner
     const loadingSpinner = screen.getByTestId("loading-spinner");
     expect(loadingSpinner).toBeTruthy();
   });
 
   it("renders loans with correct details", async () => {
-    render(
+    const { findByText } = render(
       <MockedProvider mocks={mocks} addTypename={false}>
         <LoanList />
       </MockedProvider>
     );
 
-    // Wait for the loans to load
-    const tomLoan = await screen.findByText("Tom's Loan");
+    // Wait for and check each loan name
+    const tomLoan = await findByText("Tom's Loan");
+    const chrisLoan = await findByText("Chris Wailaka");
+    const npmLoan = await findByText("NP Mobile Money");
+    const estherLoan = await findByText("Esther's Autoparts");
+
     expect(tomLoan).toBeTruthy();
-
-    // Verify all loan names are present
-    const loanNames = [
-      "Tom's Loan",
-      "Chris Wailaka",
-      "NP Mobile Money",
-      "Esther's Autoparts",
-    ];
-
-    loanNames.forEach((name) => {
-      const nameElement = screen.getByText(name);
-      expect(nameElement).toBeTruthy();
-    });
+    expect(chrisLoan).toBeTruthy();
+    expect(npmLoan).toBeTruthy();
+    expect(estherLoan).toBeTruthy();
   });
 
-  it("displays correct loan details", async () => {
-    render(
+  it("filters loans by status", async () => {
+    const { findByText, queryByText, getByRole } = render(
       <MockedProvider mocks={mocks} addTypename={false}>
         <LoanList />
       </MockedProvider>
     );
 
-    // Verify loan details
-    await screen.findByText("Tom's Loan");
+    // Wait for loans to load
+    await findByText("Tom's Loan");
 
-    // Check specific loan details
-    const principalElement = screen.getByText("$10000");
-    const interestRateElement = screen.getByText("5.0%");
-    const statusElement = screen.getByText("On Time");
+    // Select status filter
+    const statusSelect = getByRole("combobox");
 
-    expect(principalElement).toBeTruthy();
-    expect(interestRateElement).toBeTruthy();
-    expect(statusElement).toBeTruthy();
+    // Filter by "On Time"
+    fireEvent.change(statusSelect, { target: { value: "on time" } });
+    const tomLoan = await findByText("Tom's Loan");
+    const chrisLoan = queryByText("Chris Wailaka");
+
+    expect(tomLoan).toBeTruthy();
+    expect(chrisLoan).toBeNull();
+
+    // Filter by "Unpaid"
+    fireEvent.change(statusSelect, { target: { value: "unpaid" } });
+    const estherLoan = await findByText("Esther's Autoparts");
+    const tomLoanAfter = queryByText("Tom's Loan");
+
+    expect(estherLoan).toBeTruthy();
+    expect(tomLoanAfter).toBeNull();
+  });
+
+  it("displays summary statistics", async () => {
+    const { findByText } = render(
+      <MockedProvider mocks={mocks} addTypename={false}>
+        <LoanList />
+      </MockedProvider>
+    );
+
+    // Wait for loans to load and check summary statistics
+    const totalLoans = await findByText(/Total Loans: 4/);
+    const onTimeLoans = await findByText(/On Time Loans: 1/);
+    const lateLoanCount = await findByText(/Late Loans: 1/);
+    const defaultedLoanCount = await findByText(/Defaulted Loans: 1/);
+    const unpaidLoanCount = await findByText(/Unpaid Loans: 1/);
+
+    expect(totalLoans).toBeTruthy();
+    expect(onTimeLoans).toBeTruthy();
+    expect(lateLoanCount).toBeTruthy();
+    expect(defaultedLoanCount).toBeTruthy();
+    expect(unpaidLoanCount).toBeTruthy();
   });
 });

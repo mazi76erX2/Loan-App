@@ -21,8 +21,11 @@ export const LoanList: React.FC = () => {
   if (loading) return <LoadingSpinner />;
   if (error) return <p className="error-message">Error: {error.message}</p>;
 
+  // Add a safe check for data and loansWithPayments
+  const loans = data?.loansWithPayments || [];
+
   // Filter loans based on status
-  const filteredLoans = data.loans_with_payments.filter(
+  const filteredLoans = loans.filter(
     (loan: LoanType) =>
       filter === "all" || loan.status.toLowerCase() === filter.toLowerCase()
   );
@@ -31,13 +34,19 @@ export const LoanList: React.FC = () => {
   const statusOptions = ["all", "on time", "late", "defaulted", "unpaid"];
 
   // Calculate status counts
-  const statusCounts = data.loans_with_payments.reduce(
+  const statusCounts = loans.reduce(
     (acc: any, loan: LoanType) => {
       const status = loan.status.toLowerCase();
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
-    {}
+    {
+      all: loans.length,
+      "on time": 0,
+      late: 0,
+      defaulted: 0,
+      unpaid: 0,
+    }
   );
 
   return (
@@ -64,12 +73,12 @@ export const LoanList: React.FC = () => {
       <table className="loans-table">
         <thead>
           <tr>
+            <th>Status</th>
             <th>Name</th>
             <th>Principal</th>
             <th>Interest Rate</th>
             <th>Due Date</th>
             <th>Payment Date</th>
-            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -87,6 +96,21 @@ export const LoanList: React.FC = () => {
                   .toLowerCase()
                   .replace(" ", "-")}`}
               >
+                <td>
+                  <div
+                    className="status-indicator"
+                    style={{
+                      backgroundColor: loan.color,
+                      display: "inline-block",
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      marginRight: "8px",
+                      verticalAlign: "middle",
+                    }}
+                  ></div>
+                  {loan.status}
+                </td>
                 <td>{loan.name}</td>
                 <td>${loan.principal.toLocaleString()}</td>
                 <td>{loan.interestRate}%</td>
@@ -96,7 +120,6 @@ export const LoanList: React.FC = () => {
                     ? new Date(loan.paymentDate).toLocaleDateString()
                     : "Not Paid"}
                 </td>
-                <td>{loan.status}</td>
               </tr>
             ))
           )}
@@ -105,11 +128,7 @@ export const LoanList: React.FC = () => {
 
       {/* Summary Statistics */}
       <div className="loan-summary">
-        <div className="summary-item">
-          <span>Total Loans:</span>
-          <strong>{data.loans_with_payments.length}</strong>
-        </div>
-        {statusOptions.slice(1).map((status) => (
+        {statusOptions.map((status) => (
           <div key={status} className="summary-item">
             <span>
               {status.charAt(0).toUpperCase() + status.slice(1)} Loans:
