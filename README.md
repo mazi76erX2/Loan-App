@@ -1,137 +1,151 @@
-![Numida](logo.numida.png)
+# Loan Management System
 
-# What are we looking for in an engineer?
+This project provides an intuitive interface for managing loans and payments with real-time updates.
 
-We are looking for an full stack engineer who is familiar with contemporary Native & Server landscape and can contribute to the evolution of our codebase.
+## 🌟 Features
 
-Now, before we start. Let's apply the algorithm of success:
+### Dynamic Loan Tracking
+- View comprehensive loan details
+- Track loan payment statuses
+- Real-time updates using GraphQL
 
-```js
-while(noSuccess) {
-    tryAgain();
-    if(Dead) {
-        break;
-    }
-}
+### Intelligent Payment Categorization
+- Automatic payment status classification:
+  - **On Time** (Green)
+  - **Late** (Orange)
+  - **Defaulted** (Red)
+  - **Unpaid** (Grey)
+
+### Responsive Design
+- Seamless experience across desktop and mobile devices
+
+### Error Handling
+- Comprehensive error management
+- User-friendly error messages
+- Loading spinners during data fetching
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18.0+)
+- Docker
+- npm
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/mazi76erx2/loan-management-system.git
+   cd loan-management-system
+   ```
+
+2. Start the backend server:
+   ```bash
+   cd server
+   docker-compose up --build
+   ```
+
+3. Start the frontend:
+   ```bash
+   cd web
+   npm install
+   npm run dev
+   ```
+
+4. Open your browser:
+   - **Backend GraphQL**: [http://localhost:2024/graphql](http://localhost:2024/graphql)
+   - **Frontend**: [http://localhost:3000](http://localhost:3000)
+
+## 🫠 Technologies Used
+
+### Frontend
+- React
+- TypeScript
+- Apollo Client
+- GraphQL
+- Vite
+
+### Backend
+- Python
+- Flask
+- GraphQL
+- Docker
+
+### Testing
+- Jest
+- React Testing Library
+- Unittest
+
+## 📦 Project Structure
+
+```
+mazi76erx2-loan-app/
+├── server/
+│   ├── app/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   └── schema/
+│   └── tests/
+└── web/
+    ├── src/
+    │   ├── components/
+    │   ├── graphql/
+    │   └── utils/
 ```
 
-## What are we testing for in this assessment?
+## 🧪 Running Tests
 
-- Your skill as a frontend & backend developer.
-- Your ability to structure your code.
-- Your ability to refactor efficient data relationships & endpoints
-- Your ability to write well-typed code.
-- Your ability to write reusable components.
-- Your ability to write readable and extendable code by following the right design principles.
-- Your familiarity with contemporary frameworks and libraries.
+### Backend Tests
+```bash
+make test-server
+```
 
-## Expectations
+### Frontend Tests
+```bash
+make test-web
+```
 
-- Although we strive for perfection we don't expect everything to be perfect, **just do you**.
-- Given the size of the assignment we don't expect everything to be done, **do what you can given the time**.
+## 🌈 Key Functionalities
 
-> The assignment should take about a maximum of **3 hours** to complete.
+### Loan List
+- Display all loans
+- Color-coded status indicators
+- Responsive table layout
 
-# Assessment:
+### Add Payment
+- Simple, intuitive form
+- Validation for loan ID and payment date
+- Real-time feedback
 
-## Objective:
+## 🔍 Payment Status Logic
+- **Within 5 days of due date**: "On Time" (Green)
+- **6-30 days after due date**: "Late" (Orange)
+- **More than 30 days late**: "Defaulted" (Red)
+- **No payment made**: "Unpaid" (Grey)
 
-Update a basic server & web app to display some loan statuses.
+## 🚧 Future Improvements
+- Implement pagination
+- Add more comprehensive error handling
+- Enhance test coverage
+- Implement user authentication
 
-## Setting Up Local Server
+## 📌 Improvements for a Production System
 
-Please refer to the server [README](server/README.md) file in the root directory of the project to set up the local server.
+For a real-world application, several improvements should be made:
 
-## Requirements
+- **Database Integration**: Replace in-memory lists with a proper database (e.g., PostgreSQL, MySQL, etc.)
+- **ORM**: Add an ORM for better data validation and management (e.g., SQLAlchemy, TortoiseORM, etc.)
+- **Serialization**: Add serialization for better data handling and security (e.g., Marshmallow, Pydantic, etc.)
+- **Data Validation**: Add robust validation for all inputs (e.g., Zod, Yup, etc.)
+- **Form Library**: Use a form library for better form handling and validation (e.g., Formik, Tanstack Forms, etc.)
+- **Authentication**: Implement user authentication and authorization (e.g., JWT, OAuth, etc.)
+- **Cache Management**: Configure Apollo Client's cache policies for optimal performance 
+- **Automatic Refetching**: Add automatic refetching after mutations to keep the UI in sync
+- **Pagination**: Implement pagination for large datasets (e.g., Relay, Apollo Client's pagination)
+- **Error Handling**: Add more comprehensive error handling and logging (e.g., Sentry, Rollbar, etc.)
 
-1. **Data Refactor & Fetching with GraphQL**:
-   - Update the Graphql schema to expose loan_payments.
-   - Fetch a list of loans & their related loan_payments using a GraphQL query.
+## 👨‍💻 Author
 
-2. **Web App**:
-   - Display the loans and payments in a user-friendly format.
-   - Style loan payment status based on criteria.
+**Xolani Mazibuko**
 
-## Instructions:
-
-1. **Setup**: All the resources you require to do this assessment will be provided along with this README.
-
-2. **GraphQL Data Refactor & Fetching**:
-   - Update GraphQL Schema to expose loan_payments
-     - (Note the GraphIQL tool can be useful for debugging by visiting localhost:2024/grqphql in your browser)
-   - Consume the updated graphql schema from the web app
-
-3. **Web App Fetch & Render**:
-   - Update the web app to consume the loan and loanPayment data from the server
-   - Display this data together using well-designed components & conditional styling
-   - Note that `npm run compile` will update the generated typescript types within the `__generated__` folder.
-
-4. **Problem Solving**:
-
-    - Problem Statement:
-        - A borrower repays a loan in monthly installments. Each installment falls into one of three categories:
-            - `"On Time"` → If the payment is made within 5 days of the due date. (GREEN)
-            - `"Late"` → If the payment is made between 6 and 30 days after the due date. (ORANGE)
-            - `"Defaulted"` → If the payment is more than 30 days late. (RED)
-            - `"Unpaid"` is included for cases where there is no payment date. (GREY)
-    - Task:
-        - Write a function that categorizes loan payments and returns a new list/array where each payment including existing loan  information is combined & categorized as "On Time", "Late", "Defaulted" or "Unpaid".
-        - You should not use any external libraries.
-        - NOTE: When displaying these on the UI - use the colors next to each status as a visual indication.
-
-
-    **Expected Output**:
-
-    ```tsx
-    [
-        { id: 1, name: "Tom's Loan", interest_rate: 5.0, principal: 10000, dueDate: '2025-03-01', paymentDate: '2025-03-04', status: 'On Time' },
-        { id: 2, name: "Chris Wailaka", interest_rate: 3.5, principal: 500000, dueDate: '2025-03-01', dueDate: '2025-03-01', paymentDate: '2025-03-15', status: 'Late' },
-        { id: 3, name: "NP Mobile Money", interest_rate: 4.5, principal: 30000, dueDate: '2025-03-01', dueDate: '2025-03-01', paymentDate: '2025-04-05', status: 'Defaulted'},
-        { id: 4, name: "Esther's Autoparts", interest_rate: 1.5, principal: 40000, dueDate: '2025-03-01', dueDate: '2025-03-01', paymentDate: null, status: 'Unpaid'},
-    ]
-    ```
-
-5. **Debugging & Code Refactoring**:
-
-    - Based on this project, demonstrate your ability in refactoring this component `LoanCalculator.tsx`.
-
-6. **Bonus**:
-
-   - Build a REST Endpoint on the server that adds payments to the payments list. Use this endpoint in the web application's AddPayment component to make the call.
-   - Implement a loading spinner or some form of feedback while data is being fetched or the form is being submitted.
-   - Add error handling for both the GraphQL query and the REST API call.
-   - Any form of tests (unit/functional)
-   - Note down additional suggestions, given more time
-   - Recording of your project
-
-5. **Submission**:
-   - Ensure your code is well-documented and formatted.
-   - Push your code to your GitHub repository.
-   - Provide a link to your repository and a brief description of your approach.
-
-6. **Follow-Up Questions**:
-   - Be prepared to explain your code, discuss your approach, and suggest improvements during a follow-up session.
-   - You may be asked to extend the functionality of your application during the follow-up.
-
-## Evaluation Criteria:
-
-- Correctness and completeness of the implementation.
-- Code quality and organization.
-- User experience and interface design.
-- Ability to handle errors and edge cases.
-- Explanation and understanding of your approach during the follow-up session.
-
-## Resources:
-
-- [GraphQL Documentation](https://graphql.org/learn/)
-- [Vite Scaffolding](https://vite.dev/guide/#scaffolding-your-first-vite-project)
-- [Vite React TS Template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts)
-- [Apollo Client](https://www.apollographql.com/docs/react/get-started)
-
-## Hints
-
-- Clear and easy to understand setup instructions.
-- Keep it simple...
-- Have fun!
-
-Good luck! We look forward to reviewing your application.
+Built with ❤️ by [Xolani Mazibuko]

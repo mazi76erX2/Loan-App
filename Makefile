@@ -1,5 +1,3 @@
-# Makefile
-
 .PHONY: all start-server start-web test-server test-web build clean
 
 all: start-server start-web
@@ -23,3 +21,6 @@ build:
 clean:
 	cd server && docker-compose down
 	cd web && npm run clean
+
+compile-types:
+	cd web && npm run compile
